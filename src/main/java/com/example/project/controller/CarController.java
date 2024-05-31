@@ -65,7 +65,8 @@ public class CarController {
     @PreAuthorize("hasAuthority('MANAGER')")
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete car by ID", description = "Delete a car by id")
-    @ApiResponse(responseCode = "200", description = "Requested car was deleted with inventory decreased by 1")
+    @ApiResponse(responseCode = "200",
+            description = "Requested car was deleted with inventory decreased by 1")
     public void deleteCarById(@PathVariable Long id) {
         carService.deleteById(id);
     }

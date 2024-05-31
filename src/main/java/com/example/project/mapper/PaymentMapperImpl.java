@@ -18,7 +18,7 @@ public class PaymentMapperImpl implements PaymentMapper {
         dto.setStatus(payment.getStatus());
         dto.setType(payment.getType());
         dto.setSessionId(payment.getSessionId());
-        dto.setSessionURL(payment.getSessionURL());
+        dto.setSessionUrl(payment.getSessionUrl());
         return dto;
     }
 }

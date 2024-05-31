@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class ApiService {
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public String fetchDataFromAPI(String url) {
+    public String fetchDataFromApi(String url) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .GET()

@@ -1,6 +1,5 @@
 package com.example.project.service.impl;
 
-
 import com.example.project.dto.payment.PaymentDto;
 import com.example.project.dto.payment.PaymentRequestDto;
 import com.example.project.dto.payment.PaymentResponseDto;
@@ -94,7 +93,8 @@ public class PaymentServiceImpl implements PaymentService {
                                                             .multiply(BigDecimal.valueOf(100))
                                                             .longValueExact())
                                                     .setProductData(
-                                                            new SessionCreateParams.LineItem.PriceData
+                                                            new SessionCreateParams.LineItem
+                                                                    .PriceData
                                                                     .ProductData.Builder()
                                                                     .setName(NAME)
                                                                     .build())
@@ -167,7 +167,7 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = new Payment();
         payment.setRentalId(rentalId);
         payment.setSessionId(sessionId);
-        payment.setSessionURL(sessionUrl);
+        payment.setSessionUrl(sessionUrl);
         payment.setPayAmount(amount);
         payment.setStatus(Payment.Status.PENDING);
         payment.setType(type);

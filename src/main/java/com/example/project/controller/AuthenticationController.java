@@ -29,7 +29,8 @@ public class AuthenticationController {
     @PostMapping("/register")
     @Operation(summary = "Register a new user", description = "Register a new user")
     @ApiResponse(responseCode = "201", description = "New user is successfully registered")
-    public UserRegistrationResponseDto registerUser(@RequestBody @Valid UserRegistrationRequestDto requestDto)
+    public UserRegistrationResponseDto registerUser(
+            @RequestBody @Valid UserRegistrationRequestDto requestDto)
             throws RegistrationException {
         return userService.register(requestDto);
     }

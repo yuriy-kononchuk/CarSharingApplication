@@ -6,5 +6,5 @@ public record CreateRentalRequestDto(
         Long carId,
         LocalDate rentalDate,
         LocalDate returnDate
-    ) {
+) {
 }

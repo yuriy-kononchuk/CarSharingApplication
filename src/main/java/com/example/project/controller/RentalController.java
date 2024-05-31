@@ -84,7 +84,8 @@ public class RentalController {
     @Operation(summary = "Set a rental's actual return date",
             description = "Set a rental's actual return date")
     @ApiResponse(responseCode = "200", description = "Actual return date is successfully added")
-    public RentalDto setRentalActualReturnDate(Authentication authentication, @PathVariable Long id) {
+    public RentalDto setRentalActualReturnDate(Authentication authentication,
+                                               @PathVariable Long id) {
         User user = (User) authentication.getPrincipal();
         return rentalService.setRentalActualReturnDate(user, id);
     }

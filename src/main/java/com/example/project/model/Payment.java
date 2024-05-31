@@ -36,7 +36,7 @@ public class Payment {
     private Long rentalId;
     @NotNull
     @Column(name = "session_url", length = 512, nullable = false)
-    private URL sessionURL;
+    private URL sessionUrl;
     @NotBlank
     @Column(name = "session_id", nullable = false) // OR @JoinColumn?
     private String sessionId;

@@ -13,5 +13,5 @@ public class PaymentDto {
     private Payment.Status status;
     private Payment.Type type;
     private String sessionId;
-    private URL sessionURL;
+    private URL sessionUrl;
 }

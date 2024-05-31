@@ -21,6 +21,6 @@ public class TelegramNotificationService {
         String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
         String url = String.format(TELEGRAM_API_ENDPOINT, botToken, chatId, encodedMessage);
 
-        apiService.fetchDataFromAPI(url);
+        apiService.fetchDataFromApi(url);
     }
 }

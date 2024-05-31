@@ -6,7 +6,6 @@ import com.example.project.dto.user.UserRegistrationResponseDto;
 import com.example.project.model.Rental;
 import com.example.project.model.Role;
 import com.example.project.model.User;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -68,6 +67,4 @@ public class UserMapperImpl implements UserMapper {
 
         return userDto;
     }
-
-
 }

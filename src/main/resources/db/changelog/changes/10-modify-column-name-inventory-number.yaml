@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: modify-column-name-inventory
+      author: Yuriy Kononchuk
+      changes:
+        - renameColumn:
+            tableName: cars
+            oldColumnName: inventory_number
+            newColumnName: inventory
+            columnDataType: int

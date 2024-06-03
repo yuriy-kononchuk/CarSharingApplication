@@ -115,6 +115,11 @@ public class RentalServiceImpl implements RentalService {
             throw new IncorrectArgumentException("Can't set new actual return date, rental id: "
                     + rentalById.getId() + " is inactive. Try another rental");
         }
+        if (LocalDate.now().isBefore(rentalById.getRentalDate())) {
+            throw new IncorrectArgumentException("Can't set actual return date as today "
+                    + "because this rental starts later. Rental id: "
+                    + rentalById.getId());
+        }
         rentalById.setActualReturnDate(LocalDate.now());
         rentalById.setActive(!ACTIVE); //conditions about payment needed??
         Car carById = carRepository.findById(rentalById.getCar().getId())

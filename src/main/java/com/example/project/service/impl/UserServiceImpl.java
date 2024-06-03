@@ -32,8 +32,8 @@ public class UserServiceImpl implements UserService {
             throw new RegistrationException("Can't register a user, the user already exists");
         }
         User user = userMapper.toEntity(requestDto);
-        //user.getRoles().add(new Role(Role.RoleName.CUSTOMER)); // GENERAL OPTION
-        user.getRoles().add(new Role(Role.RoleName.MANAGER)); // fpr Testing
+        user.getRoles().add(new Role(Role.RoleName.CUSTOMER)); // GENERAL OPTION
+        //user.getRoles().add(new Role(Role.RoleName.MANAGER));
         return userMapper.toUserResponseDto(userRepository.save(user));
     }
 

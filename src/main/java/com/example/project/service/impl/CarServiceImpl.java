@@ -68,10 +68,9 @@ public class CarServiceImpl implements CarService {
 
     private void updateInventoryCount(Car car, int counterChange) {
         car.setInventory(car.getInventory() + counterChange);
+        carRepository.save(car);
         if (car.getInventory() == 0) {
             carRepository.delete(car);
-        } else {
-            carRepository.save(car);
         }
     }
 }

@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-admin-user
+      author: Yuriy Kononchuk
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: {name: id, value: "1"}
+              - column: {name: email, value: "admin@example.com"}
+              - column: {name: password, value: "$2a$12$MIMi5/KZHg2odRGjLlqsHuE2ccEM9wM8vT9l74Pef55VudqTiiTi."} #Bcrypted: 12345678
+              - column: {name: first_name, value: "Admin"}
+              - column: {name: last_name, value: "Carsharing"}

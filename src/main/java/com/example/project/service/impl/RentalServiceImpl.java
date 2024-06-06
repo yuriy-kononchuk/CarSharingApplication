@@ -31,6 +31,7 @@ public class RentalServiceImpl implements RentalService {
     private static final int DECREASE_INVENTORY = -1;
     private static final BigDecimal FINE_MULTIPLIER = BigDecimal.valueOf(2.0);
     private static final boolean IS_ACTIVE = true;
+    private static final long ONE_DAY = 1;
     private final RentalRepository rentalRepository;
     private final RentalMapper rentalMapper;
     private final CarRepository carRepository;
@@ -134,12 +135,13 @@ public class RentalServiceImpl implements RentalService {
         Rental rentalById = rentalRepository.findById(rentalId).orElseThrow(()
                 -> new EntityNotFoundException("Can't find a rental by id: " + rentalId));
         if (rentalById.isActive()) {
-            throw new IncorrectArgumentException("Can't process. rental is still active. "
+            throw new IncorrectArgumentException("Can't process, rental is still active. "
                     + "You need to complete this rental first, ID: " + rentalId);
         }
         BigDecimal dailyFee = rentalById.getCar().getDailyFee();
         long rentalDuration = ChronoUnit.DAYS.between(rentalById.getRentalDate(),
-                rentalById.getActualReturnDate()) + INCREASE_INVENTORY;
+                rentalById.getActualReturnDate());
+        rentalDuration = rentalDuration == 0 ? ONE_DAY : rentalDuration;
         BigDecimal totalPrice = dailyFee.multiply(BigDecimal.valueOf(rentalDuration));
         if (type == Payment.Type.FINE
                 && rentalById.getActualReturnDate().isAfter(rentalById.getRentalDate())) {
@@ -181,8 +183,9 @@ public class RentalServiceImpl implements RentalService {
                 );
                 telegramNotificationService.sendMessage(message);
             });
+        } else {
+            telegramNotificationService.sendMessage("No rentals overdue today!");
         }
-        telegramNotificationService.sendMessage("No rentals overdue today!");
     }
 
     private void updateInventoryCount(Car car, int counterChange) {

@@ -10,6 +10,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,9 +21,11 @@ import org.hibernate.annotations.Where;
 
 @Entity
 @Data
+@Builder
 @SQLDelete(sql = "UPDATE rentals SET is_deleted = TRUE WHERE id = ?")
 @Where(clause = "is_deleted = FALSE")
 @Table(name = "rentals")
+@AllArgsConstructor
 @NoArgsConstructor
 public class Rental {
     @Id
@@ -50,8 +54,4 @@ public class Rental {
     private boolean isActive;
     @Column(nullable = false)
     private boolean isDeleted = false;
-
-    public Rental(Long id) {
-        this.id = id;
-    }
 }

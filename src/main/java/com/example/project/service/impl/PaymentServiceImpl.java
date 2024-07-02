@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,15 +39,17 @@ public class PaymentServiceImpl implements PaymentService {
     public static final String CURRENCY = "usd";
     public static final String NAME = "Car rental payment";
     public static final String PAYMENT_STATUS_PAID = "paid";
-    @Value("${stripe.api.secret.key}")
-    private String stripeApiKey;
-    @Value("${base.url}")
-    private String baseUrl;
+    private static final String SUCCESS_PATH = "/payments/success";
+    private static final String CANCEL_PATH = "/payments/cancel";
     private final PaymentMapper paymentMapper;
     private final PaymentRepository paymentRepository;
     private final RentalService rentalService;
     private final RentalRepository rentalRepository;
     private final TelegramNotificationService telegramNotificationService;
+    @Value("${stripe.api.secret.key}")
+    private String stripeApiKey;
+    @Value("${base.url}")
+    private String baseUrl;
 
     @PostConstruct
     public void init() {
@@ -67,42 +70,16 @@ public class PaymentServiceImpl implements PaymentService {
                     paymentRequestDto.rentalId(), paymentRequestDto.type()
             );
 
-            URL successUrl = UriComponentsBuilder.fromUriString(baseUrl)
-                    .path("/payments/success")
-                    .build()
-                    .toUri()
-                    .toURL();
-            URL cancelUrl = UriComponentsBuilder.fromUriString(baseUrl)
-                    .path("/payments/cancel")
-                    .build()
-                    .toUri()
-                    .toURL();
+            URL successUrl = getUrl(SUCCESS_PATH);
+            URL cancelUrl = getUrl(CANCEL_PATH);
 
-            SessionCreateParams params =
-                    SessionCreateParams.builder()
-                            .setSuccessUrl(successUrl.toString())
-                            .setCancelUrl(cancelUrl.toString())
-                            .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                            .addLineItem(
-                                    SessionCreateParams.LineItem.builder()
-                                            .setQuantity(QUANTITY)
-                                            .setPriceData(new SessionCreateParams.LineItem.PriceData
-                                                    .Builder()
-                                                    .setCurrency(CURRENCY)
-                                                    .setUnitAmount(totalRentalPrice
-                                                            .multiply(BigDecimal.valueOf(100))
-                                                            .longValueExact())
-                                                    .setProductData(
-                                                            new SessionCreateParams.LineItem
-                                                                    .PriceData
-                                                                    .ProductData.Builder()
-                                                                    .setName(NAME)
-                                                                    .build())
-                                                    .build())
-                                            .build()
-                            )
-                            .setMode(SessionCreateParams.Mode.PAYMENT)
-                            .build();
+            SessionCreateParams params = SessionCreateParams.builder()
+                    .setSuccessUrl(successUrl.toString())
+                    .setCancelUrl(cancelUrl.toString())
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                    .addLineItem(createLineItem(totalRentalPrice))
+                    .setMode(SessionCreateParams.Mode.PAYMENT)
+                    .build();
             Session session = Session.create(params);
 
             URL sessionUrl = new URL(session.getUrl());
@@ -113,6 +90,15 @@ public class PaymentServiceImpl implements PaymentService {
         } catch (StripeException | MalformedURLException e) {
             throw new PaymentProcessingException("Can't create a payment session", e);
         }
+    }
+
+    @NotNull
+    private URL getUrl(String path) throws MalformedURLException {
+        return UriComponentsBuilder.fromUriString(baseUrl)
+                .path(path)
+                .build()
+                .toUri()
+                .toURL();
     }
 
     @Override
@@ -173,4 +159,24 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setType(type);
         paymentRepository.save(payment);
     }
+
+    private SessionCreateParams.LineItem.PriceData createPriceData(BigDecimal totalRentalPrice) {
+        return SessionCreateParams.LineItem.PriceData.builder()
+                .setCurrency(CURRENCY)
+                .setUnitAmount(totalRentalPrice.multiply(BigDecimal.valueOf(100)).longValueExact())
+                .setProductData(
+                        SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                .setName(NAME)
+                                .build()
+                )
+                .build();
+    }
+
+    private SessionCreateParams.LineItem createLineItem(BigDecimal totalRentalPrice) {
+        return SessionCreateParams.LineItem.builder()
+                .setQuantity(QUANTITY)
+                .setPriceData(createPriceData(totalRentalPrice))
+                .build();
+    }
+
 }

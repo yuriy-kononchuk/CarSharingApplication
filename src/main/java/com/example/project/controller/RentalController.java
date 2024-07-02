@@ -2,9 +2,9 @@ package com.example.project.controller;
 
 import com.example.project.dto.rental.CreateRentalRequestDto;
 import com.example.project.dto.rental.RentalDto;
-import com.example.project.exception.AccessDeniedException;
 import com.example.project.model.User;
 import com.example.project.service.RentalService;
+import com.example.project.service.RoleBasedAccessService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/rentals")
 public class RentalController {
     private final RentalService rentalService;
+    private final RoleBasedAccessService roleBasedAccessService;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
@@ -64,20 +65,13 @@ public class RentalController {
             @RequestParam Long userId,
             @RequestParam boolean isActive,
             Pageable pageable) {
-        User user = (User) authentication.getPrincipal();
-        Set<String> authorities = user.getAuthorities().stream()
+        User loggedInUser = (User) authentication.getPrincipal();
+        Set<String> authorities = loggedInUser.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
-        boolean isManager = authorities.contains("MANAGER");
-        boolean isCustomer = authorities.contains("CUSTOMER");
-        if (isCustomer) {
-            return rentalService.getRentalsByUserIdAndIsActive(user.getId(), isActive, pageable);
-        } else if (isManager) {
-            return rentalService.getRentalsByUserIdAndIsActive(userId, isActive, pageable);
-        } else {
-            throw new AccessDeniedException("You don't have sufficient rights"
-                    + " to access this resource: ");
-        }
+
+        return roleBasedAccessService.getRentalsBasedOnRole(
+                userId, isActive, loggedInUser, pageable, authorities);
     }
 
     @PostMapping("/{id}/return")
@@ -89,5 +83,4 @@ public class RentalController {
         User user = (User) authentication.getPrincipal();
         return rentalService.setRentalActualReturnDate(user, id);
     }
-
 }

@@ -3,9 +3,9 @@ package com.example.project.controller;
 import com.example.project.dto.payment.PaymentDto;
 import com.example.project.dto.payment.PaymentRequestDto;
 import com.example.project.dto.payment.PaymentResponseDto;
-import com.example.project.exception.AccessDeniedException;
 import com.example.project.model.User;
 import com.example.project.service.PaymentService;
+import com.example.project.service.RoleBasedAccessService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/payments")
 public class PaymentController {
     private final PaymentService paymentService;
+    private final RoleBasedAccessService roleBasedAccessService;
 
     @PreAuthorize("hasAuthority('MANAGER') or hasAuthority('CUSTOMER')")
     @GetMapping
@@ -44,20 +45,13 @@ public class PaymentController {
             Authentication authentication,
             Pageable pageable
     ) {
-        User user = (User) authentication.getPrincipal();
-        Set<String> authorities = user.getAuthorities().stream()
+        User loggedInUser = (User) authentication.getPrincipal();
+        Set<String> authorities = loggedInUser.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
-        boolean isManager = authorities.contains("MANAGER");
-        boolean isCustomer = authorities.contains("CUSTOMER");
-        if (isManager) {
-            return paymentService.findAllByUserId(userId, pageable);
-        } else if (isCustomer) {
-            return paymentService.findAllByUserId(user.getId(), pageable);
-        } else {
-            throw new AccessDeniedException("You don't have sufficient rights"
-                    + " to this resource: ");
-        }
+
+        return roleBasedAccessService.getPaymentsBasedOnRole(
+                userId, loggedInUser, pageable, authorities);
     }
 
     @ResponseStatus(HttpStatus.CREATED)

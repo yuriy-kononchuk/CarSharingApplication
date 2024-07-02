@@ -29,5 +29,3 @@ public class AuthenticationService {
         return new UserLoginResponseDto(user.getId(), token);
     }
 }
-
-

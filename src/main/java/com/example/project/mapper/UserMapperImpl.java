@@ -45,7 +45,7 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public UserDto toDto(User user) { //Looks the same?
+    public UserDto toDto(User user) {
         if (user == null) {
             return null;
         }

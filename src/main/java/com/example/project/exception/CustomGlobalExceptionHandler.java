@@ -8,7 +8,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +18,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    public static final String TIMESTAMP = "timestamp";
+    public static final String STATUS = "status";
+    public static final String ERROR = "error";
+    public static final String MESSAGE = "message";
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
@@ -27,8 +31,8 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
             WebRequest request
     ) {
         Map<String, Object> bodyToResponce = new LinkedHashMap<>();
-        bodyToResponce.put("timestamp", LocalDateTime.now());
-        bodyToResponce.put("status", HttpStatus.BAD_REQUEST);
+        bodyToResponce.put(TIMESTAMP, LocalDateTime.now());
+        bodyToResponce.put(STATUS, HttpStatus.BAD_REQUEST);
         List<String> errors = ex.getBindingResult().getAllErrors().stream()
                 .map(this::getErrorMessage)
                 .toList();
@@ -37,10 +41,8 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     }
 
     private String getErrorMessage(ObjectError error) {
-        if (error instanceof FieldError) {
-            String field = ((FieldError) error).getField();
-            String message = error.getDefaultMessage();
-            return field + " " + message;
+        if (error instanceof FieldError fieldError) {
+            return fieldError.getField() + " " + fieldError.getDefaultMessage();
         }
         return error.getDefaultMessage();
     }
@@ -51,10 +53,10 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
             WebRequest request
     ) {
         Map<String, Object> bodyToResponce = new LinkedHashMap<>();
-        bodyToResponce.put("timestamp", LocalDateTime.now());
-        bodyToResponce.put("status", HttpStatus.NOT_FOUND.value());
-        bodyToResponce.put("error", ex.getClass() + " Not Found");
-        bodyToResponce.put("message", ex.getMessage());
+        bodyToResponce.put(TIMESTAMP, LocalDateTime.now());
+        bodyToResponce.put(STATUS, HttpStatus.NOT_FOUND.value());
+        bodyToResponce.put(ERROR, ex.getClass() + " Not Found");
+        bodyToResponce.put(MESSAGE, ex.getMessage());
         return new ResponseEntity<>(bodyToResponce, HttpStatus.NOT_FOUND);
     }
 
@@ -64,10 +66,10 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
             WebRequest request
     ) {
         Map<String, Object> bodyToResponce = new LinkedHashMap<>();
-        bodyToResponce.put("timestamp", LocalDateTime.now());
-        bodyToResponce.put("status", HttpStatus.UNAUTHORIZED.value());
-        bodyToResponce.put("error", ex.getClass() + " Unauthorized access");
-        bodyToResponce.put("message", ex.getMessage());
+        bodyToResponce.put(TIMESTAMP, LocalDateTime.now());
+        bodyToResponce.put(STATUS, HttpStatus.UNAUTHORIZED.value());
+        bodyToResponce.put(ERROR, ex.getClass() + " Unauthorized access");
+        bodyToResponce.put(MESSAGE, ex.getMessage());
         return new ResponseEntity<>(bodyToResponce, HttpStatus.UNAUTHORIZED);
     }
 
@@ -77,10 +79,10 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
             WebRequest request
     ) {
         Map<String, Object> bodyToResponce = new LinkedHashMap<>();
-        bodyToResponce.put("timestamp", LocalDateTime.now());
-        bodyToResponce.put("status", HttpStatus.NOT_FOUND.value());
-        bodyToResponce.put("error", ex.getClass() + " Not Found");
-        bodyToResponce.put("message", ex.getMessage());
+        bodyToResponce.put(TIMESTAMP, LocalDateTime.now());
+        bodyToResponce.put(STATUS, HttpStatus.NOT_FOUND.value());
+        bodyToResponce.put(ERROR, ex.getClass() + " Not Found");
+        bodyToResponce.put(MESSAGE, ex.getMessage());
         return new ResponseEntity<>(bodyToResponce, HttpStatus.NOT_FOUND);
     }
 
@@ -90,10 +92,10 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
             WebRequest request
     ) {
         Map<String, Object> bodyToResponce = new LinkedHashMap<>();
-        bodyToResponce.put("timestamp", LocalDateTime.now());
-        bodyToResponce.put("status", HttpStatus.BAD_REQUEST.value());
-        bodyToResponce.put("error", ex.getClass() + " Incorrect data processing");
-        bodyToResponce.put("message", ex.getMessage());
+        bodyToResponce.put(TIMESTAMP, LocalDateTime.now());
+        bodyToResponce.put(STATUS, HttpStatus.BAD_REQUEST.value());
+        bodyToResponce.put(ERROR, ex.getClass() + " Incorrect data processing");
+        bodyToResponce.put(MESSAGE, ex.getMessage());
         return new ResponseEntity<>(bodyToResponce, HttpStatus.BAD_REQUEST);
     }
 
@@ -103,20 +105,20 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
             WebRequest request
     ) {
         Map<String, Object> bodyToResponce = new LinkedHashMap<>();
-        bodyToResponce.put("timestamp", LocalDateTime.now());
-        bodyToResponce.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        bodyToResponce.put("error", ex.getClass() + " Payment Processing Error");
-        bodyToResponce.put("message", ex.getMessage());
+        bodyToResponce.put(TIMESTAMP, LocalDateTime.now());
+        bodyToResponce.put(STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
+        bodyToResponce.put(ERROR, ex.getClass() + " Payment Processing Error");
+        bodyToResponce.put(MESSAGE, ex.getMessage());
         return new ResponseEntity<>(bodyToResponce, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(com.example.project.exception.AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException ex) {
         Map<String, Object> bodyToResponce = new LinkedHashMap<>();
-        bodyToResponce.put("timestamp", LocalDateTime.now());
-        bodyToResponce.put("status", HttpStatus.FORBIDDEN.value());
-        bodyToResponce.put("error", ex.getClass() + " Unauthorized access");
-        bodyToResponce.put("message", ex.getMessage());
+        bodyToResponce.put(TIMESTAMP, LocalDateTime.now());
+        bodyToResponce.put(STATUS, HttpStatus.FORBIDDEN.value());
+        bodyToResponce.put(ERROR, ex.getClass() + " Unauthorized access");
+        bodyToResponce.put(MESSAGE, ex.getMessage());
         return new ResponseEntity<>(bodyToResponce, HttpStatus.FORBIDDEN);
     }
 }

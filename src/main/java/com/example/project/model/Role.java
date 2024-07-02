@@ -23,7 +23,7 @@ public class Role implements GrantedAuthority {
     private Long id;
 
     @NotNull
-    @Column(nullable = false) // excl. (,unique = true)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private RoleName name;
 

@@ -1,10 +1,10 @@
 package com.example.project.mapper;
 
+import com.example.project.config.MapperConfig;
 import com.example.project.dto.car.CarDto;
 import com.example.project.dto.car.CreateCarRequestDto;
 import com.example.project.model.Car;
 import org.mapstruct.Mapper;
-import org.mapstruct.MapperConfig;
 
 @Mapper(config = MapperConfig.class)
 public interface CarMapper {

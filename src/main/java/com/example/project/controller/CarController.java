@@ -31,7 +31,6 @@ public class CarController {
     private final CarService carService;
 
     @ResponseStatus(HttpStatus.CREATED)
-    //@PreAuthorize("hasRole('ROLE_MANAGER')")
     @PreAuthorize("hasAuthority('MANAGER')")
     @PostMapping
     @Operation(summary = "Create a new car", description = "Create a new car")

@@ -50,5 +50,4 @@ public class UserController {
         User user = (User) authentication.getPrincipal();
         return userService.updateProfileByUserId(user.getId(), requestDto);
     }
-
 }

@@ -39,37 +39,17 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     public RentalDto save(User user, CreateRentalRequestDto requestDto) {
-        if (requestDto.rentalDate().isBefore(LocalDate.now())) {
-            throw new IncorrectArgumentException("Rental date must be today or later");
-        }
-        if (requestDto.returnDate().isBefore(requestDto.rentalDate())) {
-            throw new IncorrectArgumentException("Return date must be as rental date or later");
-        }
+        validateRentalDates(requestDto);
         Car carById = carRepository.findById(requestDto.carId()).orElseThrow(() ->
                 new EntityNotFoundException("Can't find a car by id: " + requestDto.carId()));
         if (carById.getInventory() == 0) {
             throw new DataNotFoundException("Rental is not possible,"
                     + " there's no available car left. Try another car");
         }
-        Rental rental = new Rental();
-        rental.setRentalDate(requestDto.rentalDate());
-        rental.setReturnDate(requestDto.returnDate());
-        rental.setActualReturnDate(requestDto.returnDate());
-        rental.setUser(user);
-        rental.setCar(carById);
-        rental.setActive(ACTIVE);
-
+        Rental rental = createRental(user, requestDto, carById);
         updateInventoryCount(carById, DECREASE_INVENTORY);
         Rental savedRental = rentalRepository.save(rental);
-
-        String message = String.format(
-                "New Rental ID %s created: %s %s rented %s %s %s from %s to %s for %s "
-                        + "USD daily fee",
-                savedRental.getId(), user.getFirstName(), user.getLastName(), carById.getBrand(),
-                carById.getModel(), carById.getType(), requestDto.rentalDate(),
-                requestDto.returnDate(), carById.getDailyFee()
-        );
-        telegramNotificationService.sendMessage(message);
+        sendRentalNotification(savedRental, user, carById);
 
         return rentalMapper.toDto(savedRental);
     }
@@ -155,7 +135,6 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    //@Scheduled(initialDelay = 90000, fixedDelay = 60000) // for testing
     @Scheduled(cron = "0 0 9 * * *") // Runs every day at 09:00 AM
     @Scheduled(cron = "0 0 21 * * *") // Runs every day at 09:00 PM
     public void getAllOverdueRentalsAndSendNotificationToUser() {
@@ -173,13 +152,15 @@ public class RentalServiceImpl implements RentalService {
                     days = "day";
                 }
                 String message = String.format(
-                        "Overdue Rental ID %s: User %s %s has an overdue rental for %s %s %s. "
-                                + "Rental Date: %s, Expected Return Date: %s"
-                                + System.lineSeparator()
-                                + "The overdue period is " + overduePeriod + " " + days,
+                        """
+                                Overdue Rental ID %s: User %s %s has an overdue rental for %s %s %s.
+                                Rental Date: %s, Expected Return Date: %s
+                                The overdue period is %d %s
+                                """,
                         rental.getId(), user.getFirstName(), user.getLastName(),
                         car.getBrand(), car.getModel(), car.getType(),
-                        rental.getRentalDate(), rental.getReturnDate()
+                        rental.getRentalDate(), rental.getReturnDate(),
+                        overduePeriod, days
                 );
                 telegramNotificationService.sendMessage(message);
             });
@@ -191,5 +172,37 @@ public class RentalServiceImpl implements RentalService {
     private void updateInventoryCount(Car car, int counterChange) {
         car.setInventory(car.getInventory() + counterChange);
         carRepository.save(car);
+    }
+
+    private void validateRentalDates(CreateRentalRequestDto requestDto) {
+        if (requestDto.rentalDate().isBefore(LocalDate.now())) {
+            throw new IncorrectArgumentException("Rental date must be today or later");
+        }
+        if (requestDto.returnDate().isBefore(requestDto.rentalDate())) {
+            throw new IncorrectArgumentException("Return date must be as rental date or later");
+        }
+    }
+
+    private Rental createRental(User user, CreateRentalRequestDto requestDto, Car car) {
+        Rental rental = Rental.builder()
+                .rentalDate(requestDto.rentalDate())
+                .returnDate(requestDto.returnDate())
+                .actualReturnDate(requestDto.returnDate())
+                .user(user)
+                .car(car)
+                .isActive(ACTIVE)
+                .build();
+        return rental;
+    }
+
+    private void sendRentalNotification(Rental rental, User user, Car car) {
+        String message = String.format(
+                "New Rental ID %s created: "
+                        + "%s %s rented %s %s %s from %s to %s for %s USD daily fee",
+                rental.getId(), user.getFirstName(), user.getLastName(), car.getBrand(),
+                car.getModel(), car.getType(), rental.getRentalDate(), rental.getReturnDate(),
+                car.getDailyFee()
+        );
+        telegramNotificationService.sendMessage(message);
     }
 }

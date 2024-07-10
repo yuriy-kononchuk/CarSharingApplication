@@ -35,10 +35,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
-    public static final Long QUANTITY = 1L;
-    public static final String CURRENCY = "usd";
-    public static final String NAME = "Car rental payment";
-    public static final String PAYMENT_STATUS_PAID = "paid";
+    private static final Long QUANTITY = 1L;
+    private static final String CURRENCY = "usd";
+    private static final String NAME = "Car rental payment";
+    private static final String PAYMENT_STATUS_PAID = "paid";
     private static final String SUCCESS_PATH = "/payments/success";
     private static final String CANCEL_PATH = "/payments/cancel";
     private final PaymentMapper paymentMapper;
@@ -172,11 +172,10 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
     }
 
-    private SessionCreateParams.LineItem createLineItem(BigDecimal totalRentalPrice) {
+    public SessionCreateParams.LineItem createLineItem(BigDecimal totalRentalPrice) {
         return SessionCreateParams.LineItem.builder()
                 .setQuantity(QUANTITY)
                 .setPriceData(createPriceData(totalRentalPrice))
                 .build();
     }
-
 }

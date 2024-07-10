@@ -125,11 +125,14 @@ public class RentalServiceImpl implements RentalService {
         BigDecimal totalPrice = dailyFee.multiply(BigDecimal.valueOf(rentalDuration));
         if (type == Payment.Type.FINE
                 && rentalById.getActualReturnDate().isAfter(rentalById.getRentalDate())) {
+            rentalDuration = ChronoUnit.DAYS.between(rentalById.getRentalDate(),
+                    rentalById.getReturnDate());
             long overdueDuration = ChronoUnit.DAYS.between(rentalById.getReturnDate(),
                     rentalById.getActualReturnDate());
             BigDecimal overdueMoneyToPay = dailyFee.multiply(BigDecimal.valueOf(overdueDuration))
                     .multiply(FINE_MULTIPLIER);
-            totalPrice = totalPrice.add(overdueMoneyToPay);
+            totalPrice = dailyFee.multiply(BigDecimal.valueOf(rentalDuration))
+                    .add(overdueMoneyToPay);
         }
         return totalPrice;
     }

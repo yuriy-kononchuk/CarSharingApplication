@@ -41,8 +41,6 @@ class CarServiceTest {
     @Test
     @DisplayName("Verify save() method creates a new car correctly")
     void save_NewCarAndValidCreateCarRequestDto_ReturnsCarDto() {
-        CreateCarRequestDto requestDto = new CreateCarRequestDto("Chevrolet", "Equinox",
-                Car.CarType.SUV, BigDecimal.valueOf(23.08));
         Car car = new Car();
         car.setBrand("Chevrolet");
         car.setModel("Equinox");
@@ -51,6 +49,9 @@ class CarServiceTest {
         car.setDailyFee(BigDecimal.valueOf(23.08));
         CarDto expectedCarDto = new CarDto(1L, car.getBrand(), car.getModel(), car.getType(),
                 car.getInventory(), car.getDailyFee());
+
+        CreateCarRequestDto requestDto = new CreateCarRequestDto("Chevrolet", "Equinox",
+                Car.CarType.SUV, BigDecimal.valueOf(23.08));
 
         when(carRepository.findByBrandAndModelAndTypeAndDailyFee(
                 requestDto.brand(), requestDto.model(), requestDto.type(), requestDto.dailyFee()))
@@ -61,20 +62,18 @@ class CarServiceTest {
 
         CarDto actualCarDto = carService.save(requestDto);
 
+        assertEquals(expectedCarDto, actualCarDto);
         verify(carRepository, times(1)).findByBrandAndModelAndTypeAndDailyFee(
                 requestDto.brand(), requestDto.model(), requestDto.type(), requestDto.dailyFee());
         verify(carMapper, times(1)).toEntity(requestDto);
         verify(carRepository, times(1)).save(car);
         verify(carMapper, times(1)).toDto(car);
         verifyNoMoreInteractions(carRepository, carMapper);
-        assertEquals(expectedCarDto, actualCarDto);
     }
 
     @Test
     @DisplayName("Verify save() method saves existing car and inventory correctly")
     void save_ExistingCarAndValidCreateCarRequestDto_ReturnsCarDto() {
-        CreateCarRequestDto requestDto = new CreateCarRequestDto("Chevrolet", "Equinox",
-                Car.CarType.SUV, BigDecimal.valueOf(23.08));
         Car existingCar = new Car();
         existingCar.setBrand("Chevrolet");
         existingCar.setModel("Equinox");
@@ -83,6 +82,8 @@ class CarServiceTest {
         existingCar.setDailyFee(BigDecimal.valueOf(23.08));
 
         int increasedInventory = 2;
+        CreateCarRequestDto requestDto = new CreateCarRequestDto("Chevrolet", "Equinox",
+                Car.CarType.SUV, BigDecimal.valueOf(23.08));
         CarDto expectedCarDto = new CarDto(1L, existingCar.getBrand(), existingCar.getModel(),
                 existingCar.getType(), increasedInventory, existingCar.getDailyFee());
 
@@ -93,13 +94,13 @@ class CarServiceTest {
 
         CarDto actualCarDto = carService.save(requestDto);
 
+        assertEquals(expectedCarDto, actualCarDto);
+        assertEquals(increasedInventory, existingCar.getInventory());
         verify(carRepository, times(1)).findByBrandAndModelAndTypeAndDailyFee(
                 requestDto.brand(), requestDto.model(), requestDto.type(), requestDto.dailyFee());
         verify(carRepository, times(1)).save(existingCar);
         verify(carMapper, times(1)).toDto(existingCar);
         verifyNoMoreInteractions(carRepository, carMapper);
-        assertEquals(expectedCarDto, actualCarDto);
-        assertEquals(increasedInventory, existingCar.getInventory());
     }
 
     @Test
@@ -134,7 +135,6 @@ class CarServiceTest {
                 BigDecimal.valueOf(23.08));
         CarDto carDto3 = new CarDto(3L, "Toyota", "CH-R", Car.CarType.HATCHBACK, 3,
                 BigDecimal.valueOf(23.08));
-        List<CarDto> expectedCarDtos = List.of(carDto1, carDto2, carDto3);
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -143,13 +143,14 @@ class CarServiceTest {
         when(carMapper.toDto(car2)).thenReturn(carDto2);
         when(carMapper.toDto(car3)).thenReturn(carDto3);
 
+        List<CarDto> expectedCarDtos = List.of(carDto1, carDto2, carDto3);
         List<CarDto> actualCarDtos = carService.findAll(pageable);
 
+        assertEquals(expectedCarDtos, actualCarDtos);
         AssertionsForClassTypes.assertThat(actualCarDtos.size()).isEqualTo(3);
         AssertionsForClassTypes.assertThat(actualCarDtos.get(0)).isEqualTo(carDto1);
         AssertionsForClassTypes.assertThat(actualCarDtos.get(1)).isEqualTo(carDto2);
         AssertionsForClassTypes.assertThat(actualCarDtos.get(2)).isEqualTo(carDto3);
-        assertEquals(expectedCarDtos, actualCarDtos);
         verify(carRepository, times(1)).findAll();
         verify(carMapper, times(1)).toDto(car1);
         verify(carMapper, times(1)).toDto(car2);
@@ -206,14 +207,6 @@ class CarServiceTest {
         BigDecimal updatedDailyFee = BigDecimal.valueOf(29.99);
         UpdateCarRequestDto requestDto = new UpdateCarRequestDto(updatedInventory, updatedDailyFee);
 
-        Car existingCar = new Car();
-        existingCar.setId(carId);
-        existingCar.setBrand("Chevrolet");
-        existingCar.setModel("Equinox");
-        existingCar.setType(Car.CarType.SUV);
-        existingCar.setInventory(3);
-        existingCar.setDailyFee(BigDecimal.valueOf(23.08));
-
         Car updatedCar = new Car();
         updatedCar.setId(carId);
         updatedCar.setBrand("Chevrolet");
@@ -221,6 +214,14 @@ class CarServiceTest {
         updatedCar.setType(Car.CarType.SUV);
         updatedCar.setDailyFee(requestDto.dailyFee());
         updatedCar.setInventory(requestDto.inventory());
+
+        Car existingCar = new Car();
+        existingCar.setId(carId);
+        existingCar.setBrand("Chevrolet");
+        existingCar.setModel("Equinox");
+        existingCar.setType(Car.CarType.SUV);
+        existingCar.setInventory(3);
+        existingCar.setDailyFee(BigDecimal.valueOf(23.08));
 
         CarDto expectedCarDto = new CarDto(carId, "Chevrolet", "Equinox", Car.CarType.SUV,
                 updatedInventory, updatedDailyFee);

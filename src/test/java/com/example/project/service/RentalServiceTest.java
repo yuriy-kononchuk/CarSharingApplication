@@ -57,7 +57,6 @@ class RentalServiceTest {
     @DisplayName("Verify save() method creates RentalDto correctly with valid data")
     void save_ValidCreateRentalRequestDto_ReturnsRentalDto() {
         Long carId = 1L;
-        Long rentalId = 1L;
 
         User user = new User();
         user.setId(1L);
@@ -75,7 +74,9 @@ class RentalServiceTest {
         car.setInventory(3);
         car.setDailyFee(BigDecimal.valueOf(23.08));
 
-        int expectedCarInventory = car.getInventory() - 1;
+        final int expectedCarInventory = car.getInventory() - 1;
+
+        Long rentalId = 1L;
 
         Rental rental = Rental.builder()
                 .id(rentalId)
@@ -103,14 +104,15 @@ class RentalServiceTest {
         RentalDto actualRentalDto = rentalService.save(user, requestDto);
         int actualCarInventory = car.getInventory();
 
-        AssertionsForClassTypes.assertThat(actualRentalDto).isEqualTo(expectedRentalDto);
         assertEquals(expectedCarInventory, actualCarInventory);
+        AssertionsForClassTypes.assertThat(actualRentalDto).isEqualTo(expectedRentalDto);
         verify(carRepository, times(1)).findById(carId);
         verify(carRepository, times(1)).save(car);
         verify(rentalRepository, times(1)).save(any(Rental.class));
         verify(rentalMapper, times(1)).toDto(rental);
         verify(telegramNotificationService, times(1)).sendMessage(anyString());
-        verifyNoMoreInteractions(carRepository, rentalRepository, rentalMapper, telegramNotificationService);
+        verifyNoMoreInteractions(carRepository, rentalRepository,
+                rentalMapper, telegramNotificationService);
     }
 
     @Test
@@ -144,12 +146,12 @@ class RentalServiceTest {
         User user = new User();
         user.setId(1L);
 
-        CreateRentalRequestDto requestDto = new CreateRentalRequestDto(carId,
-                LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
-
         Car car = new Car();
         car.setId(carId);
         car.setInventory(0);
+
+        CreateRentalRequestDto requestDto = new CreateRentalRequestDto(carId,
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
 
         when(carRepository.findById(carId)).thenReturn(Optional.of(car));
 
@@ -208,7 +210,6 @@ class RentalServiceTest {
     @DisplayName("Verify getById() method returns RentalDtos list for valid user and rental Ids")
     void getById_ValidUserIdAndRentalId_ReturnsRentalDto() {
         Long userId = 1L;
-        Long rentalId = 1L;
 
         User user = new User();
         user.setId(userId);
@@ -223,18 +224,20 @@ class RentalServiceTest {
         car.setInventory(3);
         car.setDailyFee(BigDecimal.valueOf(23.08));
 
+        Long rentalId = 1L;
+
         Rental rental = Rental.builder()
                 .id(rentalId)
                 .user(user)
                 .car(car)
                 .build();
 
-        List<Rental> userRentals = List.of(rental);
-
         RentalDto expectedRentalDto = new RentalDto();
         expectedRentalDto.setId(rentalId);
         expectedRentalDto.setUserId(userId);
         expectedRentalDto.setCarId(car.getId());
+
+        List<Rental> userRentals = List.of(rental);
 
         when(rentalRepository.findByUserId(userId)).thenReturn(userRentals);
         when(rentalRepository.findById(rentalId)).thenReturn(Optional.of(rental));
@@ -300,10 +303,6 @@ class RentalServiceTest {
     @DisplayName("Verify getRentalsByUserIdAndIsActive() method returns RentalDto list "
             + "of active rentals for valid userId")
     void getRentalsByUserIdAndIsActive_ValidUserIdAndActive_ReturnsActiveRentalDtos() {
-        Long userId = 1L;
-        boolean isActive = true;
-        Pageable pageable = PageRequest.of(0, 10);
-
         Rental rental1 = Rental.builder()
                 .id(1L)
                 .isActive(true)
@@ -321,6 +320,10 @@ class RentalServiceTest {
         rentalDto2.setId(rental2.getId());
 
         List<RentalDto> expectedRentalDtos = List.of(rentalDto1, rentalDto2);
+
+        Long userId = 1L;
+        boolean isActive = true;
+        Pageable pageable = PageRequest.of(0, 10);
 
         when(rentalRepository.findByUserId(userId)).thenReturn(activeRentals);
         when(rentalRepository.findByUserIdAndIsActive(userId, isActive)).thenReturn(activeRentals);
@@ -343,10 +346,6 @@ class RentalServiceTest {
     @DisplayName("Verify getRentalsByUserIdAndIsActive() method returns RentalDto list "
             + "of inactive rentals for valid userId")
     void getRentalsByUserIdAndIsNotActive_ValidUserIdAndActive_ReturnsInactiveRentalDtos() {
-        Long userId = 1L;
-        boolean isActive = false;
-        Pageable pageable = PageRequest.of(0, 10);
-
         Rental rental1 = Rental.builder()
                 .id(1L)
                 .isActive(false)
@@ -363,6 +362,9 @@ class RentalServiceTest {
         RentalDto rentalDto2 = new RentalDto();
         rentalDto2.setId(rental2.getId());
 
+        Long userId = 1L;
+        boolean isActive = false;
+        Pageable pageable = PageRequest.of(0, 10);
         List<RentalDto> expectedRentalDtos = List.of(rentalDto1, rentalDto2);
 
         when(rentalRepository.findByUserId(userId)).thenReturn(activeRentals);
@@ -407,7 +409,8 @@ class RentalServiceTest {
 
         List<RentalDto> expectedRentalDtos = Collections.emptyList();
 
-        List<RentalDto> actualRentalDtos = rentalService.getRentalsByUserIdAndIsActive(userId, isActive, pageable);
+        List<RentalDto> actualRentalDtos = rentalService
+                .getRentalsByUserIdAndIsActive(userId, isActive, pageable);
 
         AssertionsForClassTypes.assertThat(actualRentalDtos).isEqualTo(expectedRentalDtos);
 
@@ -440,7 +443,6 @@ class RentalServiceTest {
     @DisplayName("Verify setRentalActualReturnDate() method sets actual return date as today,"
             + " increases car inventory by one and returns RentalDto if valid data")
     void setRentalActualReturnDate_ValidUserAndRentalId_ReturnsUpdatedRentalDto() {
-        Long rentalId = 1L;
         Long userId = 1L;
         Long carId = 1L;
 
@@ -454,6 +456,10 @@ class RentalServiceTest {
         car.setType(Car.CarType.SUV);
         car.setInventory(2);
 
+        final int expectedInventory = car.getInventory() + 1;
+
+        Long rentalId = 1L;
+
         Rental rental = Rental.builder()
                 .id(rentalId)
                 .rentalDate(LocalDate.now().minusDays(2))
@@ -462,16 +468,6 @@ class RentalServiceTest {
                 .user(user)
                 .car(car)
                 .isActive(true)
-                .build();
-
-        Rental updatedRental = Rental.builder()
-                .id(rentalId)
-                .rentalDate(rental.getRentalDate())
-                .returnDate(rental.getReturnDate())
-                .actualReturnDate(LocalDate.now())
-                .user(user)
-                .car(car)
-                .isActive(false)
                 .build();
 
         RentalDto expectedRentalDto = new RentalDto();
@@ -483,7 +479,15 @@ class RentalServiceTest {
         expectedRentalDto.setUserId(userId);
         expectedRentalDto.setIsActive("INACTIVE");
 
-        int expectedInventory = car.getInventory() + 1;
+        Rental updatedRental = Rental.builder()
+                .id(rentalId)
+                .rentalDate(rental.getRentalDate())
+                .returnDate(rental.getReturnDate())
+                .actualReturnDate(LocalDate.now())
+                .user(user)
+                .car(car)
+                .isActive(false)
+                .build();
 
         when(rentalRepository.findByUserIdAndId(userId, rentalId)).thenReturn(Optional.of(rental));
         when(carRepository.findById(carId)).thenReturn(Optional.of(car));
@@ -493,8 +497,8 @@ class RentalServiceTest {
         RentalDto actualRentalDto = rentalService.setRentalActualReturnDate(user, rentalId);
         int actualInventory = car.getInventory();
 
-        AssertionsForClassTypes.assertThat(actualRentalDto).isEqualTo(expectedRentalDto);
         assertEquals(expectedInventory, actualInventory);
+        AssertionsForClassTypes.assertThat(actualRentalDto).isEqualTo(expectedRentalDto);
         verify(rentalRepository, times(1)).findByUserIdAndId(userId, rentalId);
         verify(rentalRepository, times(1)).save(rental);
         verify(carRepository, times(1)).findById(carId);
@@ -600,7 +604,8 @@ class RentalServiceTest {
 
         when(rentalRepository.findById(rentalId)).thenReturn(Optional.of(rental));
 
-        BigDecimal actualTotalPrice = rentalService.calculateRentalTotalPrice(rentalId, Payment.Type.PAYMENT);
+        BigDecimal actualTotalPrice = rentalService
+                .calculateRentalTotalPrice(rentalId, Payment.Type.PAYMENT);
 
         assertEquals(expectedTotalPrice, actualTotalPrice);
         verify(rentalRepository, times(1)).findById(rentalId);
@@ -638,7 +643,8 @@ class RentalServiceTest {
 
         when(rentalRepository.findById(rentalId)).thenReturn(Optional.of(rental));
 
-        BigDecimal actualTotalPrice = rentalService.calculateRentalTotalPrice(rentalId, Payment.Type.FINE);
+        BigDecimal actualTotalPrice = rentalService
+                .calculateRentalTotalPrice(rentalId, Payment.Type.FINE);
 
         assertEquals(expectedTotalPrice, actualTotalPrice);
         verify(rentalRepository, times(1)).findById(rentalId);

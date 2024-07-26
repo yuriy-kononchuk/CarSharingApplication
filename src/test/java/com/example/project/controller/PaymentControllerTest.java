@@ -57,8 +57,6 @@ class PaymentControllerTest {
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Customer gets own payments only is successful")
     void getAllPayments_ValidAuthenticatedUserCustomerAndAnyUserId_Success() throws Exception {
-        Long userId = 100L;
-
         PaymentDto paymentDto1 = new PaymentDto();
         paymentDto1.setId(1L);
         paymentDto1.setRentalId(1L);
@@ -80,6 +78,8 @@ class PaymentControllerTest {
         List<PaymentDto> expected = new ArrayList<>();
         expected.add(paymentDto1);
         expected.add(paymentDto2);
+
+        Long userId = 100L;
 
         MvcResult result = mockMvc.perform(get("/payments")
                         .param("userId", String.valueOf(userId)))
@@ -107,8 +107,6 @@ class PaymentControllerTest {
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Manager gets payments of any user by its ID is successful")
     void getAllPayments_ValidAuthenticatedManagerAndIdAnotherUser_Success() throws Exception {
-        Long userId = 5L;
-
         PaymentDto paymentDto1 = new PaymentDto();
         paymentDto1.setId(1L);
         paymentDto1.setRentalId(1L);
@@ -131,6 +129,8 @@ class PaymentControllerTest {
         expected.add(paymentDto1);
         expected.add(paymentDto2);
 
+        Long userId = 5L;
+
         MvcResult result = mockMvc.perform(get("/payments")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
@@ -148,6 +148,7 @@ class PaymentControllerTest {
     @WithUserDetails("manager@test.com")
     @Test
     @Sql(scripts = {
+            "classpath:database/users/delete-test-users-cars-set.sql",
             "classpath:database/users/add-test-users-cars-set.sql",
             "classpath:database/payments/add-test-payments-to-payments-table.sql"
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -157,8 +158,6 @@ class PaymentControllerTest {
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Manager gets owned payments of any user by own user ID is successful")
     void getAllPayments_ValidAuthenticatedManagerAndIdThisUser_Success() throws Exception {
-        Long userId = 6L;
-
         PaymentDto paymentDto1 = new PaymentDto();
         paymentDto1.setId(3L);
         paymentDto1.setRentalId(4L);
@@ -180,6 +179,8 @@ class PaymentControllerTest {
         List<PaymentDto> expected = new ArrayList<>();
         expected.add(paymentDto1);
         expected.add(paymentDto2);
+
+        Long userId = 6L;
 
         MvcResult result = mockMvc.perform(get("/payments")
                         .param("userId", String.valueOf(userId)))
@@ -270,9 +271,9 @@ class PaymentControllerTest {
 
     @WithUserDetails("testuser@test.com")
     @Test
-    @Sql(scripts = "classpath:database/users/add-test-users-cars-set.sql",
+    @Sql(scripts = "classpath:database/users/add-test-user.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "classpath:database/users/delete-test-users-cars-set.sql",
+    @Sql(scripts = "classpath:database/users/delete-test-user.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Create payment session with active rental is Bad Request")
     void createPaymentSession_InValidRentalId_ReturnsNorFound() throws Exception {

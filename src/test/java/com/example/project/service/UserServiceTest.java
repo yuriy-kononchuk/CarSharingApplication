@@ -163,13 +163,13 @@ class UserServiceTest {
     @Test
     @DisplayName("Verify updateProfileByUserId() updates user's profile by Id and returns UserDto")
     void updateProfileByUserId_ValidUserId_ReturnsUpdatedUserDto() {
-        Long userId = 1L;
-
         UserRegistrationRequestDto requestDto = new UserRegistrationRequestDto();
         requestDto.setEmail("new_email@example.com");
         requestDto.setPassword("new_password");
         requestDto.setFirstName("Updated");
         requestDto.setLastName("User");
+
+        Long userId = 1L;
 
         User existingUser = new User();
         existingUser.setId(userId);
@@ -213,13 +213,13 @@ class UserServiceTest {
     @Test
     @DisplayName("Verify updateProfileByUserId() with invalid user Id throws exception")
     void updateProfileByUserId_InvalidUserId_ThrowsException() {
-        Long userId = 1L;
-
         UserRegistrationRequestDto requestDto = new UserRegistrationRequestDto();
         requestDto.setEmail("new_email@example.com");
         requestDto.setPassword("new_password");
         requestDto.setFirstName("Updated");
         requestDto.setLastName("User");
+
+        Long userId = 1L;
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
@@ -237,8 +237,6 @@ class UserServiceTest {
     void updateUserRole_ValidUserId_ReturnsUpdatedUserDto() {
         Long userId = 1L;
 
-        UserRoleRequestDto requestDto = new UserRoleRequestDto(Role.RoleName.MANAGER);
-
         User existingUser = new User();
         existingUser.setId(userId);
         existingUser.setEmail("test@example.com");
@@ -250,10 +248,10 @@ class UserServiceTest {
 
         User updatedUser = new User();
         updatedUser.setId(userId);
+        updatedUser.getRoles().add(roleToUpdate);
         updatedUser.setEmail("test@example.com");
         updatedUser.setFirstName("User");
         updatedUser.setLastName("Last");
-        updatedUser.getRoles().add(roleToUpdate);
 
         UserDto updatedUserDto = new UserDto();
         updatedUserDto.setId(updatedUser.getId());
@@ -267,6 +265,7 @@ class UserServiceTest {
         when(userRepository.save(existingUser)).thenReturn(updatedUser);
         when(userMapper.toDto(updatedUser)).thenReturn(updatedUserDto);
 
+        UserRoleRequestDto requestDto = new UserRoleRequestDto(Role.RoleName.MANAGER);
         UserDto actualUserDto = userService.updateUserRole(userId, requestDto);
 
         assertNotNull(actualUserDto);

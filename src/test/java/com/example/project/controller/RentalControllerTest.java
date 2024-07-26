@@ -213,9 +213,6 @@ class RentalControllerTest {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Get all active rentals for user CUSTOMER is successful")
     void getAllRentalsByUserAndIsActive_UserIsCustomer_Success() throws Exception {
-        Long userId = 5L;
-        boolean isActive = true;
-
         RentalDto activeRentalDto1 = new RentalDto();
         activeRentalDto1.setId(1L);
         activeRentalDto1.setRentalDate(LocalDate.of(2024, 3, 1));
@@ -237,6 +234,9 @@ class RentalControllerTest {
         List<RentalDto> expected = new ArrayList<>();
         expected.add(activeRentalDto1);
         expected.add(activeRentalDto2);
+
+        Long userId = 5L;
+        boolean isActive = true;
 
         MvcResult result = mockMvc.perform(get("/rentals")
                         .param("userId", userId.toString())
@@ -260,9 +260,6 @@ class RentalControllerTest {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Get all inactive rentals for user CUSTOMER is successful")
     void getAllRentalsByUserAndIsInActive_UserIsCustomer_Success() throws Exception {
-        Long userId = 5L;
-        boolean isActive = false;
-
         RentalDto inactiveRentalDto = new RentalDto();
         inactiveRentalDto.setId(3L);
         inactiveRentalDto.setRentalDate(LocalDate.of(2024, 1, 1));
@@ -274,6 +271,9 @@ class RentalControllerTest {
 
         List<RentalDto> expected = new ArrayList<>();
         expected.add(inactiveRentalDto);
+
+        Long userId = 5L;
+        boolean isActive = false;
 
         MvcResult result = mockMvc.perform(get("/rentals")
                         .param("userId", userId.toString())
@@ -297,9 +297,6 @@ class RentalControllerTest {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @DisplayName("Get all active rentals for user MANAGER is successful")
     void getAllRentalsByUserAndIsActive_UserIsManager_Success() throws Exception {
-        Long userId = 6L;
-        boolean isActive = true;
-
         RentalDto activeRentalDto = new RentalDto();
         activeRentalDto.setId(4L);
         activeRentalDto.setRentalDate(LocalDate.of(2024, 2, 1));
@@ -311,6 +308,9 @@ class RentalControllerTest {
 
         List<RentalDto> expected = new ArrayList<>();
         expected.add(activeRentalDto);
+
+        Long userId = 6L;
+        boolean isActive = true;
 
         MvcResult result = mockMvc.perform(get("/rentals")
                         .param("userId", userId.toString())
@@ -348,9 +348,9 @@ class RentalControllerTest {
 
         assertNotNull(actual);
         assertEquals(rentalId, actual.getId());
+        assertEquals(11, actualCar.getInventory());
         assertNotNull(actual.getActualReturnDate());
         assertEquals(LocalDate.now(), actual.getActualReturnDate());
-        assertEquals(11, actualCar.getInventory());
         assertEquals("false", actual.getIsActive());
     }
 

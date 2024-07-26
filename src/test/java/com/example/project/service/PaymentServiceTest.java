@@ -109,16 +109,19 @@ class PaymentServiceTest {
                     .addLineItem(paymentService.createLineItem(totalRentalPrice))
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .build();
-            mockedSession.when(() -> Session.create(any(SessionCreateParams.class))).thenReturn(session);
+            mockedSession.when(() -> Session.create(
+                    any(SessionCreateParams.class))).thenReturn(session);
 
-            PaymentResponseDto actualResponseDto = paymentService.createPaymentSession(paymentRequestDto, userId);
+            PaymentResponseDto actualResponseDto = paymentService
+                    .createPaymentSession(paymentRequestDto, userId);
 
             assertNotNull(actualResponseDto);
             assertEquals("http://session.url", actualResponseDto.sessionUrl());
             assertEquals("session_id", actualResponseDto.sessionId());
 
             verify(rentalRepository, times(1)).findByUserId(userId);
-            verify(rentalService, times(1)).calculateRentalTotalPrice(rentalId, Payment.Type.PAYMENT);
+            verify(rentalService, times(1))
+                    .calculateRentalTotalPrice(rentalId, Payment.Type.PAYMENT);
             verify(paymentRepository, times(1)).save(any(Payment.class));
             verifyNoMoreInteractions(rentalRepository, rentalService, paymentRepository);
         }
@@ -236,8 +239,6 @@ class PaymentServiceTest {
         Set<Rental> rentals = Set.of(rental1, rental2);
         user.setRentals(rentals);
 
-        List<Rental> expectedRentals = List.of(rental1, rental2);
-
         Payment payment1 = new Payment();
         payment1.setId(1L);
         payment1.setRentalId(1L);
@@ -251,7 +252,8 @@ class PaymentServiceTest {
         PaymentDto paymentDto2 = new PaymentDto();
         paymentDto2.setId(payment2.getId());
         paymentDto2.setRentalId(payment2.getRentalId());
-        List<PaymentDto> expectedPaymentDtos = List.of(paymentDto1, paymentDto2);
+
+        List<Rental> expectedRentals = List.of(rental1, rental2);
 
         when(rentalRepository.findByUserId(userId)).thenReturn(expectedRentals);
         when(paymentRepository.findByRentalId(1L)).thenReturn(Optional.of(payment1));
@@ -260,6 +262,7 @@ class PaymentServiceTest {
         when(paymentMapper.toDto(payment2)).thenReturn(paymentDto2);
 
         Pageable pageable = PageRequest.of(0, 10);
+        List<PaymentDto> expectedPaymentDtos = List.of(paymentDto1, paymentDto2);
         List<PaymentDto> actualPaymentDtos = paymentService.findAllByUserId(userId, pageable);
 
         assertEquals(expectedPaymentDtos, actualPaymentDtos);

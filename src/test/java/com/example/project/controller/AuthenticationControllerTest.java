@@ -39,7 +39,7 @@ class AuthenticationControllerTest {
     private UserService userService;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Test
     @Sql(scripts = "classpath:database/users/delete-test-user.sql",

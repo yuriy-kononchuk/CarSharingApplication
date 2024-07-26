@@ -67,10 +67,10 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     ) {
         Map<String, Object> bodyToResponce = new LinkedHashMap<>();
         bodyToResponce.put(TIMESTAMP, LocalDateTime.now());
-        bodyToResponce.put(STATUS, HttpStatus.UNAUTHORIZED.value());
-        bodyToResponce.put(ERROR, ex.getClass() + " Unauthorized access");
+        bodyToResponce.put(STATUS, HttpStatus.CONFLICT.value());
+        bodyToResponce.put(ERROR, ex.getClass() + " The user already exists");
         bodyToResponce.put(MESSAGE, ex.getMessage());
-        return new ResponseEntity<>(bodyToResponce, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(bodyToResponce, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = {DataNotFoundException.class})

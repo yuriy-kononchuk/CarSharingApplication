@@ -3,7 +3,6 @@ package com.example.project.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.example.project.model.User;
-import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -55,8 +54,6 @@ class UserRepositoryTest {
     @DisplayName("Verify to find user by id with roles and rentals")
     void findById_ValidId_ReturnsUserOptional() {
         Long userId = 1L;
-        List<User> allUsers = userRepository.findAll();
-        System.out.println("All users in the database: " + allUsers);
 
         Optional<User> actualUser = userRepository.findById(userId);
 

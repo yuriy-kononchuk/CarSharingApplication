@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: create users-roles-table
+      author: Yuriy Kononchuk
+      changes:
+        - createTable:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  autoIncrement: false
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  autoIncrement: false
+                  constraints:
+                    primaryKey: false
+                    nullable: false

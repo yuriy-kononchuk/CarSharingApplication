@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-manager-role
+      author: Yuriy Kononchuk
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column: {name: id, value: "1"}
+              - column: {name: name, value: "MANAGER"}

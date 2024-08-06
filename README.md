@@ -105,12 +105,17 @@ This app is Docker ready! The **Dockerfile** and **docker-compose.yml** files ar
 2.	Create MySQL Schema for this app with a command : ```mysql> CREATE DATABASE car_sharing_app;``` ;
 3.	Make sure that **Maven** is already installed using command line : ```mvn -v``` command. And if it is not you need to install it first;
 4.	In your destination folder with this app  run command ```mvn clean package``` to generate a .jar file;
-5.	In your root project folder create a text file named ```.env``` with the following :
+5.	In your root project folder create a text file named ```.env``` with the following content. You can copy the .env.template file provided and fill in the actual values :
 ```
-MYSQL_ROOT_PASSWORD=your password to MySQL
+STRIPE_API_SECRET_KEY='add your Stripe API secret key'
+STRIPE_API_PUBLIC_KEY='add your Stripe API public key'
+TELEGRAM_API_BOT_TOKEN='add actual Telegram API token'
+TELEGRAM_API_CHAT_ID='add actual Telegram API chat_id'
+
+MYSQL_ROOT_PASSWORD='add your password to MySQL DB'
 MYSQL_DATABASE=car_sharing_app
-DB_USER=root (or your MySQL user_name)
-DB_PASSWORD=your password to MySQL
+DB_USER='root (or your MySQL user_name)'
+DB_PASSWORD='your password to MySQL'
 
 MYSQL_LOCAL_PORT=3308
 MYSQL_DOCKER_PORT=3306
